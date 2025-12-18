@@ -7,10 +7,37 @@ import AddPlace from "./screens/AddPlace";
 import IconButton from "./components/UI/IconButton";
 import { Colors } from "./constants/colors";
 import Map from "./screens/Map";
+import { useEffect, useState } from "react";
+import { init } from "./util/database";
+import * as SplashScreen from "expo-splash-screen";
+import PlaceDetails from "./screens/PlaceDetails";
 
 const Stack = createNativeStackNavigator();
+SplashScreen.preventAutoHideAsync();
 
 export default function App() {
+  const [isReady, setIsReady] = useState(false);
+
+  useEffect(() => {
+    init()
+      .then(() => {
+        setIsReady(true);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }, []);
+
+  useEffect(() => {
+    if (isReady) {
+      SplashScreen.hide();
+    }
+  }, [isReady]);
+
+  if (!isReady) {
+    return null;
+  }
+
   return (
     <>
       <StatusBar style="dark" />
@@ -44,6 +71,11 @@ export default function App() {
             options={{ title: "Add a New Place" }}
           />
           <Stack.Screen name="Map" component={Map}></Stack.Screen>
+          <Stack.Screen
+            name="PlaceDetails"
+            component={PlaceDetails}
+            options={{ title: "Loading Place..." }}
+          ></Stack.Screen>
         </Stack.Navigator>
       </NavigationContainer>
     </>
